@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+// See README.md in this directory for a description of these.
+package protocol;
+option java_package = "com.couchbase.grpc.protocol";
+option java_multiple_files = true;
+
+enum Upgrade {
+    OFFLINE = 0;
+    REBALANCE_IN = 1;
+    REBALANCE_SWAP = 2;
+};
+
+enum Tests {
+    PRE_UPGRADE = 0;
+    DURING_UPGRADE = 1;
+    POST_UPGRADE = 2;
+}
+
+
+message CreateConnectionRequest {
+    string clusterHostname=1;
+    string clusterUsername=2;
+    string clusterPassword=3;
+    string bucketName=4;
+    string scopeName = 5;
+    string collectionName = 6;
+}
+
+message CreateConnectionResponse {
+    bool connected=1;
+    string errors=2;
+}
+
+message UpgradeTestRequest {
+    Tests testType = 1;
+    Upgrade upgradeType = 2;
+}
+
+message UpgradeTestResponse {
+    Tests testType = 1;
+    string done = 2;
+    string errors = 3;
+}
+
+
+
+service UpgradeTestingService {
+
+    rpc createConnection (CreateConnectionRequest) returns (CreateConnectionResponse);
+
+    rpc doUpgradeTests (UpgradeTestRequest) returns (UpgradeTestResponse);
+
+}

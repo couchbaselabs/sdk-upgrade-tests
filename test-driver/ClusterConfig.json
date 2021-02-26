@@ -1,0 +1,11 @@
+{
+  "cluster": "172.23.111.128",
+  "bucket": {
+    "bucketName": "default",
+    "secBucketName": "secBucket"
+  },
+  "performerPorts": [8050],
+  "loggerLevel": "all:Info",
+  "excludeTests" : ["situational"],
+  "durability" : "majority"
+}
