@@ -35,7 +35,6 @@ public class Client {
     inputParameters.parseParameters();
 
     couchbaseInstall();
-
     clusterConfigure();
 
     if (!connectToTestServer()) {
@@ -43,6 +42,8 @@ public class Client {
     }
 
     Upgrade upgradeType = inputParameters.getUpgradeType();
+
+    logger.info("Cluster is setup. Beginning testing.");
 
     sendUpgradeTestRequest(upgradeType, Tests.PRE_UPGRADE);
 
@@ -63,7 +64,7 @@ public class Client {
   }
 
   private static void doUpgrade() {
-    //Calls to Couchbase Admin
+    logger.info("Starting upgrade");
     try {
       upgrader.start().get();
     } catch (RestApiException e) {
@@ -73,6 +74,7 @@ public class Client {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
+    logger.info("Upgrade completed.");
 
   }
 
@@ -158,51 +160,4 @@ public class Client {
     }
 
   }
-
-//  public static void main(String[] args) {
-//
-//
-//    //Parse Parameters --can copy
-//
-//    //Install and create cluster -- copy, also think about how many nodes of what type. Install new version at this point too?
-//
-//    //Do pre upgrade tests -- done below
-//
-//    //Do during upgrade tests
-//
-//    //Perform upgrade -- some stuff in
-//
-//    //Finish upgrade tests -- TODO: Add this to the proto
-//
-//    //Do post-upgrade tests
-//
-//
-//    ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 8080)
-//            .usePlaintext()
-//            .build();
-//
-//    UpgradeTestingServiceGrpc.UpgradeTestingServiceBlockingStub stub
-//            = UpgradeTestingServiceGrpc.newBlockingStub(channel);
-//
-//    CreateConnectionResponse response = stub.createConnection(CreateConnectionRequest.newBuilder()
-//            .setClusterHostname("localhost")
-//            .setBucketName("default")
-//            .setClusterUsername("Administrator")
-//            .setClusterPassword("password")
-//            .setScopeName("_default")
-//            .setCollectionName("_default")
-//            .build());
-//
-//    System.out.println("SENT BACK: " +  response.getConnected() + " with errors: " + response.getErrors());
-//
-//    UpgradeTestResponse upgradeTestResponse = stub.doUpgradeTests(UpgradeTestRequest.newBuilder()
-//            .setUpgradeType(Upgrade.OFFLINE)
-//            .setTestType(Tests.PRE_UPGRADE)
-//            .build());
-//
-//    System.out.println("SENT BACK: " + upgradeTestResponse.getDone() + " With errors: " + upgradeTestResponse.getErrors());
-//
-//
-//    channel.shutdown();
-//  }
 }
