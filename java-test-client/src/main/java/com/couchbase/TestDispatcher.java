@@ -35,7 +35,6 @@ public class TestDispatcher {
 
     Launcher launcher = LauncherFactory.create();
 
-    // Register a listener of your choice
     SummaryGeneratingListener listener = new SummaryGeneratingListener();
     launcher.registerTestExecutionListeners(listener);
 
@@ -52,6 +51,9 @@ public class TestDispatcher {
 
     duringUpgradeTest.run();
 
+
+    duringUpgradeTest.stop();
+
   }
 
   public static void runPostUpgradeTests() {
@@ -65,7 +67,6 @@ public class TestDispatcher {
 
     Launcher launcher = LauncherFactory.create();
 
-    // Register a listener of your choice
     SummaryGeneratingListener listener = new SummaryGeneratingListener();
     launcher.registerTestExecutionListeners(listener);
 

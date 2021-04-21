@@ -23,6 +23,7 @@ public class UpgradeSwapAction {
     public UpgradeSwapAction(ClusterConfigure cluster, String service) {
         this.cluster = cluster;
         this.services = service;
+        System.out.println("UPGRADER HAS BEEN INITIALISED");
     }
 
     public void setup(int numNodes) {

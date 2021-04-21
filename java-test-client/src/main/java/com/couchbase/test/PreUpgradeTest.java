@@ -27,16 +27,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class PreUpgradeTest extends UpgradeTestBase{
 
-//  @Test
-//  public void doUpsertTest() {
-//    String id = "id1";// Do randomised
-//    String content = "foo=bar";
-//
-//    collection.upsert(id , content);
-//
-//
-//    assertEquals(collection.get(id).contentAs(String.class), content);
-//  }
 
   // More transactions-related tests to be added by Praneeth
 
@@ -100,13 +90,7 @@ public class PreUpgradeTest extends UpgradeTestBase{
     assertFalse(decoded.containsKey("age"));
   }
 
-  /**
-   * Right now the mock does not support xattr/macro expansion so this test is
-   * ignored on the mock. Once the mock supports it, please remove the ignore
-   * annotation.
-   *
-   * <p>See https://github.com/couchbase/CouchbaseMock/issues/46</p>
-   */
+
   @Test
   void fullDocWithExpiration() {
     String id = UUID.randomUUID().toString();

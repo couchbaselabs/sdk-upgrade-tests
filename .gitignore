@@ -2,3 +2,4 @@ target/
 .idea
 *.iml
 build/
+upgrade-grpc-common/src/main/java/com/couchbase/grpc/

@@ -345,8 +345,8 @@ public class ClusterConfigure {
             adm.createBucket(bConfig);
         }
         String bucketName = clusterconfigureutils.setupMainBucket(adm);
-        clusterconfigureutils.setupSecondaryBucket(adm); // To cover MB-26144, since it happens when multiple buckets are created on Spock node
-        clusterconfigureutils.waitForBucketReady();
+//        clusterconfigureutils.setupSecondaryBucket(adm); // To cover MB-26144, since it happens when multiple buckets are created on Spock node
+//        clusterconfigureutils.waitForBucketReady();
 
         if (inputParameters.getUseMaxConn()!=0) {
             adm.setClusterMaxConn(inputParameters.getUseMaxConn());

@@ -1,20 +1,18 @@
 package com.couchbase;
 
-import com.couchbase.grpc.protocol.*;
+import com.couchbase.grpc.protocol.CreateConnectionRequest;
+import com.couchbase.grpc.protocol.CreateConnectionResponse;
+import com.couchbase.grpc.protocol.UpgradeTestRequest;
+import com.couchbase.grpc.protocol.UpgradeTestResponse;
 import com.couchbase.grpc.protocol.UpgradeTestingServiceGrpc;
 import com.couchbase.utils.RequestVariableExtractor;
 import io.grpc.stub.StreamObserver;
 
 
-//import org.junit.internal.TextListener;
-//import org.junit.runner.JUnitCore;
-//import org.junit.runner.Result;
-
 import static com.couchbase.utils.RequestVariableExtractor.extractConnectionRequest;
 
 
 public class UpgradeTestingService extends UpgradeTestingServiceGrpc.UpgradeTestingServiceImplBase {
- // JUnitCore junit = new JUnitCore();
   TestDispatcher testDispatcher = new TestDispatcher();
 
 
@@ -34,12 +32,14 @@ public class UpgradeTestingService extends UpgradeTestingServiceGrpc.UpgradeTest
 
   @Override
   public void doUpgradeTests(UpgradeTestRequest request, StreamObserver<UpgradeTestResponse> responseObserver) {
-    //Do routing to the right tests and upgrade info?
     String tmp = "";
-    //Result result;
 
-    //junit.addListener(new TextListener(System.out));
-
+    UpgradeTestResponse response = UpgradeTestResponse.newBuilder()
+            .setDone(tmp)
+            .setErrors("")
+            .build();
+    responseObserver.onNext(response);
+    responseObserver.onCompleted();
 
     switch(request.getTestType()) {
       case PRE_UPGRADE:
@@ -56,13 +56,6 @@ public class UpgradeTestingService extends UpgradeTestingServiceGrpc.UpgradeTest
         tmp = "ERROR";
     }
     System.out.println(tmp);
-
-    UpgradeTestResponse response = UpgradeTestResponse.newBuilder()
-            .setDone(tmp)
-            .setErrors("")
-            .build();
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
   }
 
 
