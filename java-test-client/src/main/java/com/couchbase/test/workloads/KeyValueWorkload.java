@@ -8,11 +8,12 @@ public class KeyValueWorkload extends WorkloadBase{
     super(info);
   }
 
+  //TODO: Add complete CRUD ops
   @Override
   public void run() {
     int id = 0;
     String res;
-    while (!stopped && id < 1400) {
+    while (!stopped) {
       try {
         collection.upsert(String.valueOf(id), "Foo: bar " + id);
         res = "SUCCESS";

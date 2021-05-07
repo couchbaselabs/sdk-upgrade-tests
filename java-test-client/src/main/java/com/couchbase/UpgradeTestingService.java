@@ -34,20 +34,12 @@ public class UpgradeTestingService extends UpgradeTestingServiceGrpc.UpgradeTest
   public void doUpgradeTests(UpgradeTestRequest request, StreamObserver<UpgradeTestResponse> responseObserver) {
     String tmp = "";
 
-    UpgradeTestResponse response = UpgradeTestResponse.newBuilder()
-            .setDone(tmp)
-            .setErrors("")
-            .build();
-    responseObserver.onNext(response);
-    responseObserver.onCompleted();
-
     switch(request.getTestType()) {
       case PRE_UPGRADE:
-        //result = junit.run(PreUpgradeTest.class);
         testDispatcher.runPreUpgradeTests();
         break;
       case DURING_UPGRADE:
-        testDispatcher.runDuringUpgradeTests();
+        testDispatcher.runDuringUpgradeTests(request.getStop());
         break;
       case POST_UPGRADE:
         testDispatcher.runPostUpgradeTests();
@@ -55,7 +47,13 @@ public class UpgradeTestingService extends UpgradeTestingServiceGrpc.UpgradeTest
       default:
         tmp = "ERROR";
     }
-    System.out.println(tmp);
+
+    UpgradeTestResponse response = UpgradeTestResponse.newBuilder()
+      .setDone(tmp)
+      .setErrors("")
+      .build();
+    responseObserver.onNext(response);
+    responseObserver.onCompleted();
   }
 
 

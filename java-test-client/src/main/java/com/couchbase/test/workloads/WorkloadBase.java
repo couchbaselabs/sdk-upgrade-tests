@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class WorkloadBase {
+public abstract class WorkloadBase implements Runnable{
 
   public Cluster cluster;
   public Bucket bucket;
@@ -26,7 +26,7 @@ public class WorkloadBase {
 
   public WorkloadBase(ClusterTestInfo info) {
     cluster = Cluster.connect(info.getCluster(), info.getUser(), info.getPassword());
-    //cluster.waitUntilReady(Duration.ofSeconds(15L));
+    cluster.waitUntilReady(Duration.ofSeconds(15L));
 
     bucket = cluster.bucket(info.getBucket());
     scope = bucket.scope(info.getScope());
@@ -35,16 +35,14 @@ public class WorkloadBase {
     results = new HashMap<>();
   }
 
-  public void run() {
-
-  }
+  public abstract void run();
 
   public void stop(){
+    cluster.disconnect();
     stopped = true;
     boolean passed = testPassed();
     //System.out.println(String.format("Workload %s with percentage %f", passed ? "passed" : "failed", successRatio));
-    System.out.println(String.format("Workload %s", passed ? "passed" : "failed"));
-
+    System.out.println(String.format("%s %s", this.getClass().getName(),passed ? "passed" : "failed"));
   }
 
 

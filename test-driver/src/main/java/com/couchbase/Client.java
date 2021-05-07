@@ -57,10 +57,7 @@ public class Client {
 
     doUpgrade();
 
-    stopUpgradeTests();
-  }
-
-  private static void stopUpgradeTests() {
+    sendUpgradeTestRequest(upgrade, Tests.DURING_UPGRADE, true);
   }
 
   private static void doUpgrade() {
@@ -78,15 +75,6 @@ public class Client {
 
   }
 
-  private static String startUpgradeTests() {
-    UpgradeTestResponse response = stub.doUpgradeTests(UpgradeTestRequest.newBuilder()
-            .setUpgradeType(Upgrade.OFFLINE)
-            .setTestType(Tests.DURING_UPGRADE)
-            .build());
-
-    logger.error(response.getErrors());
-    return response.getDone();
-  }
 
   private static boolean connectToTestServer() {
     channel = ManagedChannelBuilder.forAddress("localhost", 8080)
@@ -109,17 +97,20 @@ public class Client {
     return response.getConnected();
   }
 
-
   private static String sendUpgradeTestRequest(Upgrade upgrade, Tests test) {
+    return sendUpgradeTestRequest(upgrade, test, false);
+  }
+
+  private static String sendUpgradeTestRequest(Upgrade upgrade, Tests test, boolean stop) {
     UpgradeTestResponse response = stub.doUpgradeTests(UpgradeTestRequest.newBuilder()
             .setUpgradeType(upgrade)
             .setTestType(test)
+            .setStop(stop)
             .build());
 
     logger.error(response.getErrors());
     return response.getDone();
   }
-
 
 
   public static void couchbaseInstall() {

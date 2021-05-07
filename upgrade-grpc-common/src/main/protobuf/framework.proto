@@ -35,6 +35,7 @@ message CreateConnectionResponse {
 message UpgradeTestRequest {
     Tests testType = 1;
     Upgrade upgradeType = 2;
+    bool stop = 3;
 }
 
 message UpgradeTestResponse {

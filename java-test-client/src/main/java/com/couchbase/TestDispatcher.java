@@ -19,6 +19,7 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 public class TestDispatcher {
 
   private static ClusterTestInfo clusterTestInfo;
+  private static DuringUpgradeTest duringUpgradeTest;
 
   public TestDispatcher() {
 
@@ -45,15 +46,15 @@ public class TestDispatcher {
 
   }
 
-  public static void runDuringUpgradeTests() {
-    System.out.println("STARING DURING UPGRADE TESTS");
-    DuringUpgradeTest duringUpgradeTest = new DuringUpgradeTest(clusterTestInfo);
-
-    duringUpgradeTest.run();
-
-
-    duringUpgradeTest.stop();
-
+  public static void runDuringUpgradeTests(boolean stop) {
+    if (!stop) {
+      System.out.println("STARING DURING UPGRADE TESTS");
+      duringUpgradeTest = new DuringUpgradeTest(clusterTestInfo);
+      duringUpgradeTest.run();
+    } else {
+      System.out.println("STOPPING DURING UPGRADE TESTS");
+      duringUpgradeTest.stop();
+    }
   }
 
   public static void runPostUpgradeTests() {

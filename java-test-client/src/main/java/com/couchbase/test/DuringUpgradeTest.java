@@ -2,12 +2,17 @@ package com.couchbase.test;
 
 import com.couchbase.test.workloads.KeyValueWorkload;
 import com.couchbase.test.workloads.QueryWorkload;
+import com.couchbase.test.workloads.WorkloadBase;
 import com.couchbase.utils.ClusterTestInfo;
 
-//TODO: Make list of workloads that are run amd add the right ones to a list dependent on services
+import java.util.ArrayList;
+import java.util.List;
+
 public class DuringUpgradeTest {
 
   ClusterTestInfo info;
+  List<WorkloadBase> workloadsToRun = new ArrayList<>();
+
   KeyValueWorkload keyValueWorkload;
   QueryWorkload queryWorkload;
 
@@ -16,20 +21,29 @@ public class DuringUpgradeTest {
     this.info = info;
     keyValueWorkload = new KeyValueWorkload(info);
     queryWorkload = new QueryWorkload(info);
+
+    workloadsToRun.add(keyValueWorkload);
+    workloadsToRun.add(queryWorkload);
   }
 
   public void run() {
-//    keyValueWorkload.run();
-    queryWorkload.run();
+    for(WorkloadBase workload : workloadsToRun) {
+      Thread thread = new Thread(workload);
+      thread.start();
+    }
   }
 
   public void stop() {
+    for(WorkloadBase workload : workloadsToRun) {
+      workload.stop();//Will exit run() and thread will be destroyed automatically
+    }
+
 //    keyValueWorkload.stop();
 //    keyValueWorkload.results.forEach((s, i) ->
 //            System.out.println(String.format("Got %s , %d times.", s, i)));
-    queryWorkload.stop();
-    queryWorkload.results.forEach((s, i) ->
-            System.out.println(String.format("Got %s , %d times.", s, i)));
+//    queryWorkload.stop();
+//    queryWorkload.results.forEach((s, i) ->
+//            System.out.println(String.format("Got %s , %d times.", s, i)));
   }
 
 }

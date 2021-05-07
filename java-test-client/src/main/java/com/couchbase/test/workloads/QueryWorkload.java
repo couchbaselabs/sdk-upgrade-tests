@@ -18,28 +18,23 @@ public class QueryWorkload extends WorkloadBase{
   public void run() {
     extraLoad();
 
-    int id = 0;
     String res;
     String statement = "SELECT * from `" + bucket.name() + "` WHERE `tag` = \"n1ql\"";
-    while (!stopped && id < 1100) {
+    while (!stopped) {
       try {
         QueryResult queryResult = cluster.query(statement, QueryOptions.queryOptions().adhoc(false));
-        System.out.println(queryResult.metaData().status());
-        res = "SUCCESS";
+        res = queryResult.metaData().status().toString();
       } catch (Exception e){
         res = e.getMessage();
       }
       addResult(res);
-      id++;
-      //id %= 1000;
     }
-    System.out.println("DONE QUERIES");
   }
 
   private void extraLoad() {
     int id = 0;
     String res;
-    while (id < 10000) {
+    while (id < 100) {
       try {
         JsonObject obj = JsonObject.create().put("type", "n1qldoc")
                 .put("id", id)
