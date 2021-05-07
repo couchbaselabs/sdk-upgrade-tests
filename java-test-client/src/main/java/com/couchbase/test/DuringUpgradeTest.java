@@ -2,6 +2,7 @@ package com.couchbase.test;
 
 import com.couchbase.test.workloads.KeyValueWorkload;
 import com.couchbase.test.workloads.QueryWorkload;
+import com.couchbase.test.workloads.TransactionsWorkload;
 import com.couchbase.test.workloads.WorkloadBase;
 import com.couchbase.utils.ClusterTestInfo;
 
@@ -15,15 +16,20 @@ public class DuringUpgradeTest {
 
   KeyValueWorkload keyValueWorkload;
   QueryWorkload queryWorkload;
+  TransactionsWorkload txnWorkload;
 
 
   public DuringUpgradeTest(ClusterTestInfo info) {
     this.info = info;
+    //TODO: Pick the workloads to run from cmdline
     keyValueWorkload = new KeyValueWorkload(info);
     queryWorkload = new QueryWorkload(info);
+    txnWorkload = new TransactionsWorkload(info);
+
 
     workloadsToRun.add(keyValueWorkload);
     workloadsToRun.add(queryWorkload);
+    workloadsToRun.add(txnWorkload);
   }
 
   public void run() {

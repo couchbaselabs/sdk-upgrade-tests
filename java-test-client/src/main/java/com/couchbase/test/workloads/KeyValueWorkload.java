@@ -22,7 +22,7 @@ public class KeyValueWorkload extends WorkloadBase{
       }
       addResult(res);
       id++;
-      //id %= 1000;
+      id %= 15000;
     }
   }
 
