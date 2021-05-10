@@ -1,5 +1,6 @@
 package com.couchbase.test;
 
+import com.couchbase.grpc.protocol.Workload;
 import com.couchbase.test.workloads.KeyValueWorkload;
 import com.couchbase.test.workloads.QueryWorkload;
 import com.couchbase.test.workloads.TransactionsWorkload;
@@ -14,22 +15,28 @@ public class DuringUpgradeTest {
   ClusterTestInfo info;
   List<WorkloadBase> workloadsToRun = new ArrayList<>();
 
-  KeyValueWorkload keyValueWorkload;
-  QueryWorkload queryWorkload;
-  TransactionsWorkload txnWorkload;
 
-
-  public DuringUpgradeTest(ClusterTestInfo info) {
+  public DuringUpgradeTest(ClusterTestInfo info, List<Workload> workloads) {
     this.info = info;
-    //TODO: Pick the workloads to run from cmdline
-    keyValueWorkload = new KeyValueWorkload(info);
-    queryWorkload = new QueryWorkload(info);
-    txnWorkload = new TransactionsWorkload(info);
-
-
-    workloadsToRun.add(keyValueWorkload);
-    workloadsToRun.add(queryWorkload);
-    workloadsToRun.add(txnWorkload);
+    workloads.forEach(workload -> {
+      switch (workload) {
+        case KV:
+          KeyValueWorkload keyValueWorkload = new KeyValueWorkload(info);
+          workloadsToRun.add(keyValueWorkload);
+          break;
+        case QUERY:
+          QueryWorkload queryWorkload = new QueryWorkload(info);
+          workloadsToRun.add(queryWorkload);
+          break;
+        case TXN_KV:
+          TransactionsWorkload txnWorkload = new TransactionsWorkload(info);
+          workloadsToRun.add(txnWorkload);
+          break;
+        case TXN_QUERY:
+        case UNRECOGNIZED:
+          break;
+      }
+    });
   }
 
   public void run() {

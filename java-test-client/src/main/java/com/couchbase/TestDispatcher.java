@@ -1,5 +1,6 @@
 package com.couchbase;
 
+import com.couchbase.grpc.protocol.Workload;
 import com.couchbase.test.DuringUpgradeTest;
 import com.couchbase.test.PostUpgradeTest;
 import com.couchbase.test.PreUpgradeTest;
@@ -12,6 +13,7 @@ import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
@@ -46,10 +48,10 @@ public class TestDispatcher {
 
   }
 
-  public static void runDuringUpgradeTests(boolean stop) {
+  public static void runDuringUpgradeTests(boolean stop, List<Workload> workloadList) {
     if (!stop) {
       System.out.println("STARING DURING UPGRADE TESTS");
-      duringUpgradeTest = new DuringUpgradeTest(clusterTestInfo);
+      duringUpgradeTest = new DuringUpgradeTest(clusterTestInfo, workloadList);
       duringUpgradeTest.run();
     } else {
       System.out.println("STOPPING DURING UPGRADE TESTS");

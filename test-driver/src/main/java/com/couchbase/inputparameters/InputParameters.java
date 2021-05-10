@@ -1,10 +1,14 @@
 package com.couchbase.inputparameters;
 
 import com.couchbase.grpc.protocol.Upgrade;
+import com.couchbase.grpc.protocol.Workload;
 import com.couchbase.logging.LogUtil;
 import org.slf4j.Logger;
 
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class is used mainly install cluster.
@@ -57,6 +61,10 @@ public class InputParameters {
   private int activeNodes = 2;
   private Upgrade upgradeType;
 
+
+
+  private List<Workload> workloadList;
+
   public InputParameters(String[] parameters) {
     this.parameters = parameters;
     logger = LogUtil.getLogger(InputParameters.class);
@@ -93,6 +101,10 @@ public class InputParameters {
         case "preUpgradeNodes":
           this.activeNodes = Integer.parseInt(parameter.split("=")[1]);
           break;
+        case "workloads" :
+          this.workloadList = Arrays.stream(parameter.split("=")[1].split(","))
+            .map(w -> Workload.valueOf(w))
+            .collect(Collectors.toList());
         default:
           logger.warn("Undefined input: {} Ignoring it", parameter.split("=")[0]);
       }
@@ -177,6 +189,9 @@ public class InputParameters {
     return secBucketType;
   }
 
+  public List<Workload> getWorkloadList() {
+    return workloadList;
+  }
 
   public String getn1qlFieldsToIndex() {
     return n1qlFieldsToIndex;

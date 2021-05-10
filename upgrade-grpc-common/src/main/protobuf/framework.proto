@@ -17,6 +17,13 @@ enum Tests {
     POST_UPGRADE = 2;
 }
 
+enum Workload {
+    KV = 0;
+    QUERY = 1;
+    TXN_KV = 2;
+    TXN_QUERY = 3;
+}
+
 
 message CreateConnectionRequest {
     string clusterHostname=1;
@@ -36,6 +43,7 @@ message UpgradeTestRequest {
     Tests testType = 1;
     Upgrade upgradeType = 2;
     bool stop = 3;
+    repeated Workload workloads = 4;
 }
 
 message UpgradeTestResponse {

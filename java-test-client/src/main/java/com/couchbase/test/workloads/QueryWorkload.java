@@ -7,7 +7,7 @@ import com.couchbase.client.java.query.QueryResult;
 import com.couchbase.utils.ClusterTestInfo;
 import com.google.protobuf.RpcUtil;
 
-public class QueryWorkload extends WorkloadBase{
+public class QueryWorkload extends WorkloadBase {
   public QueryWorkload(ClusterTestInfo info) {
     super(info);
   }
@@ -16,6 +16,7 @@ public class QueryWorkload extends WorkloadBase{
 
   @Override
   public void run() {
+    System.out.println("RUNNING QUERY");
     extraLoad();
 
     String res;
@@ -24,7 +25,7 @@ public class QueryWorkload extends WorkloadBase{
       try {
         QueryResult queryResult = cluster.query(statement, QueryOptions.queryOptions().adhoc(false));
         res = queryResult.metaData().status().toString();
-      } catch (Exception e){
+      } catch (Exception e) {
         res = e.getMessage();
       }
       addResult(res);
@@ -37,11 +38,11 @@ public class QueryWorkload extends WorkloadBase{
     while (id < 100) {
       try {
         JsonObject obj = JsonObject.create().put("type", "n1qldoc")
-                .put("id", id)
-                .put("tag", "n1ql")
-                .put("bible_stuff", text);
+          .put("id", id)
+          .put("tag", "n1ql")
+          .put("bible_stuff", text);
         collection.upsert(String.valueOf(id), obj);//"{\"type\":\"n1qldoc\",\"id\":\""+ id+"\",\"tag\":\"n1ql\"}");
-      } catch (Exception e){
+      } catch (Exception e) {
       }
       id++;
       //id %= 1000;

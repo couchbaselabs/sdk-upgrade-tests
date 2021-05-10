@@ -39,7 +39,7 @@ public class UpgradeTestingService extends UpgradeTestingServiceGrpc.UpgradeTest
         testDispatcher.runPreUpgradeTests();
         break;
       case DURING_UPGRADE:
-        testDispatcher.runDuringUpgradeTests(request.getStop());
+        testDispatcher.runDuringUpgradeTests(request.getStop(), request.getWorkloadList());
         break;
       case POST_UPGRADE:
         testDispatcher.runPostUpgradeTests();

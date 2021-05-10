@@ -22,6 +22,7 @@ public class TransactionsWorkload extends WorkloadBase{
 
   @Override
   public void run() {
+    System.out.println("RUNNING TXNS");
     String randomIdString = "txnId";
     JsonObject insertObject = JsonObject.create().put("content", "txn-inserted");
     JsonObject replaceObject = JsonObject.create().put("content", "txn-replaced");

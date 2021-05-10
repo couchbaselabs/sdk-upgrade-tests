@@ -11,6 +11,7 @@ public class KeyValueWorkload extends WorkloadBase{
   //TODO: Add complete CRUD ops
   @Override
   public void run() {
+    System.out.println("RUNNING KV");
     int id = 0;
     String res;
     while (!stopped) {
