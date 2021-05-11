@@ -20,7 +20,7 @@ public abstract class WorkloadBase implements Runnable{
 
   public Map<String, Integer> results;
   public boolean stopped = false;
-  private double passPercentage = 0.99;
+  private double passPercentage = 0.7;
   private double successRatio;
 
 
@@ -41,12 +41,12 @@ public abstract class WorkloadBase implements Runnable{
     cluster.disconnect();
     stopped = true;
     boolean passed = testPassed();
-    //System.out.println(String.format("Workload %s with percentage %f", passed ? "passed" : "failed", successRatio));
-    System.out.println(String.format("%s %s", this.getClass().getName(),passed ? "passed" : "failed"));
+    System.out.println(String.format("%s %s with percentage %f", this.getClass().getName(), passed ? "passed" : "failed", successRatio));
+    printResults();
   }
 
 
-  public boolean testPassed() {
+  protected boolean testPassed() {
     AtomicReference<Double> success = new AtomicReference<>(0.0);
     AtomicReference<Double> totalErrors = new AtomicReference<>(0.0);
 
@@ -58,18 +58,24 @@ public abstract class WorkloadBase implements Runnable{
       }
     });
 
-    successRatio = success.get() / totalErrors.get();
+    successRatio = success.get() / (totalErrors.get() + success.get());
 
     return successRatio > passPercentage;
   }
 
   //TODO: Timestamped results so can accurately determine if test passed
-  public void addResult(String s) {
+  protected void addResult(String s) {
     try {
       int n = results.get(s);
       results.replace(s, n, ++n);
     } catch (NullPointerException p) {
       results.put(s, 1);
+    }
+  }
+
+  private void printResults() {
+    for (Map.Entry<String, Integer> entry : results.entrySet()) {
+      System.out.println(entry.getKey() + " : " + entry.getValue());
     }
   }
 }

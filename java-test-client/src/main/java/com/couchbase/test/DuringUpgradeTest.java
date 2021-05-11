@@ -29,10 +29,12 @@ public class DuringUpgradeTest {
           workloadsToRun.add(queryWorkload);
           break;
         case TXN_KV:
-          TransactionsWorkload txnWorkload = new TransactionsWorkload(info);
+          TransactionsWorkload txnWorkload = new TransactionsWorkload(info, false);
           workloadsToRun.add(txnWorkload);
           break;
         case TXN_QUERY:
+          TransactionsWorkload txnQueryWorkload = new TransactionsWorkload(info, true);
+          workloadsToRun.add(txnQueryWorkload);
         case UNRECOGNIZED:
           break;
       }
@@ -50,13 +52,6 @@ public class DuringUpgradeTest {
     for(WorkloadBase workload : workloadsToRun) {
       workload.stop();//Will exit run() and thread will be destroyed automatically
     }
-
-//    keyValueWorkload.stop();
-//    keyValueWorkload.results.forEach((s, i) ->
-//            System.out.println(String.format("Got %s , %d times.", s, i)));
-//    queryWorkload.stop();
-//    queryWorkload.results.forEach((s, i) ->
-//            System.out.println(String.format("Got %s , %d times.", s, i)));
   }
 
 }
