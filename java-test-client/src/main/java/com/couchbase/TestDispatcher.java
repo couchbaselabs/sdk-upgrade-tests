@@ -11,8 +11,11 @@ import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
+import org.junit.platform.reporting.legacy.xml.LegacyXmlReportGeneratingListener;
 
 import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
@@ -29,23 +32,7 @@ public class TestDispatcher {
 
   public static void runPreUpgradeTests() {
     System.out.println("DOING PRE UPGRADE");
-    LauncherDiscoveryRequest launchRequest = LauncherDiscoveryRequestBuilder.request()
-            .selectors(
-                    //selectPackage("com.couchbase.tests"),
-                    selectClass(PreUpgradeTest.class)
-            )
-            .build();
-
-    Launcher launcher = LauncherFactory.create();
-
-    SummaryGeneratingListener listener = new SummaryGeneratingListener();
-    launcher.registerTestExecutionListeners(listener);
-
-    launcher.execute(launchRequest);
-
-    TestExecutionSummary summary = listener.getSummary();
-    summary.printTo(new PrintWriter(System.out));
-
+    runTests(PreUpgradeTest.class);
   }
 
   public static void runDuringUpgradeTests(boolean stop, List<Workload> workloadList) {
@@ -61,26 +48,33 @@ public class TestDispatcher {
 
   public static void runPostUpgradeTests() {
     System.out.println("DOING POST UPGRADE TESTS");
+    runTests(PostUpgradeTest.class);
+  }
+
+  public void setClusterTestInfo(ClusterTestInfo clusterTestInfo) {
+    this.clusterTestInfo = clusterTestInfo;
+  }
+
+  private static void runTests(Class testClass) {
     LauncherDiscoveryRequest launchRequest = LauncherDiscoveryRequestBuilder.request()
-            .selectors(
-                    //selectPackage("com.couchbase.tests"),
-                    selectClass(PostUpgradeTest.class)
-            )
-            .build();
+      .selectors(
+        selectClass(testClass)
+      )
+      .build();
 
     Launcher launcher = LauncherFactory.create();
 
     SummaryGeneratingListener listener = new SummaryGeneratingListener();
     launcher.registerTestExecutionListeners(listener);
 
+    Path reportsDir = Paths.get("target", "xml-reports", testClass.getName());
+
+    LegacyXmlReportGeneratingListener xmlReportGeneratingListener = new LegacyXmlReportGeneratingListener(reportsDir, new PrintWriter(System.out));
+    launcher.registerTestExecutionListeners(xmlReportGeneratingListener);
+
     launcher.execute(launchRequest);
 
     TestExecutionSummary summary = listener.getSummary();
     summary.printTo(new PrintWriter(System.out));
-
-  }
-
-  public void setClusterTestInfo(ClusterTestInfo clusterTestInfo) {
-    this.clusterTestInfo = clusterTestInfo;
   }
 }
