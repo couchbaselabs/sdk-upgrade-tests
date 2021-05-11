@@ -113,7 +113,7 @@ public class Client {
             .setUpgradeType(upgrade)
             .setTestType(test)
             .setStop(stop)
-            .addAllWorkload(workloads)
+            .addAllWorkloads(workloads)
             .build());
 
     logger.error(response.getErrors());
