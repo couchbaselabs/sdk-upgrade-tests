@@ -15,6 +15,7 @@ import com.couchbase.grpc.protocol.UpgradeTestingServiceGrpc;
 import com.couchbase.grpc.protocol.Workload;
 import com.couchbase.inputparameters.InputParameters;
 import com.couchbase.logging.LogUtil;
+import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.slf4j.Logger;
@@ -92,6 +93,8 @@ public class Client {
 
     CreateConnectionResponse response = stub.createConnection(CreateConnectionRequest.newBuilder()
             .setClusterHostname(inputParameters.getClusterNodes().getFirst().ip)
+            .setClusterHostnameAfterUpgradeBytes(ByteString.copyFromUtf8(inputParameters.getClusterNodes()
+              .get(inputParameters.getClusterNodes().size()-inputParameters.getActiveNodes()).ip))
             .setBucketName(inputParameters.getbucketName())
             .setClusterUsername(Strings.ADMIN_USER)
             .setClusterPassword(Strings.PASSWORD)

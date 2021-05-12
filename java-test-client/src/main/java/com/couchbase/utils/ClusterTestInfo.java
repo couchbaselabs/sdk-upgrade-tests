@@ -2,6 +2,10 @@ package com.couchbase.utils;
 
 public class ClusterTestInfo {
     String cluster;
+
+
+
+    String clusterUpgrade;
     String user;
     String password;
     String bucket;
@@ -30,6 +34,9 @@ public class ClusterTestInfo {
         return collection;
     }
 
+    public String getClusterUpgrade() {
+        return clusterUpgrade;
+    }
     String scope;
     String collection;
 }

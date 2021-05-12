@@ -27,11 +27,12 @@ enum Workload {
 
 message CreateConnectionRequest {
     string clusterHostname=1;
-    string clusterUsername=2;
-    string clusterPassword=3;
-    string bucketName=4;
-    string scopeName = 5;
-    string collectionName = 6;
+    string clusterHostnameAfterUpgrade=2;
+    string clusterUsername=3;
+    string clusterPassword=4;
+    string bucketName=5;
+    string scopeName = 6;
+    string collectionName = 7;
 }
 
 message CreateConnectionResponse {

@@ -9,6 +9,11 @@ import com.couchbase.client.java.codec.RawBinaryTranscoder;
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.GetResult;
 import com.couchbase.client.java.kv.MutationResult;
+import com.couchbase.client.java.query.QueryResult;
+import com.couchbase.transactions.TransactionDurabilityLevel;
+import com.couchbase.transactions.TransactionGetResult;
+import com.couchbase.transactions.Transactions;
+import com.couchbase.transactions.config.TransactionConfigBuilder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,15 +34,17 @@ public class PostUpgradeTest {// extends UpgradeTestBase{
   private static String bucketName;
   private static String scopeName;
   private static String collectionName;
+  private static String fullCollectionName;
 
   public static Cluster cluster;
   public static Bucket bucket;
   public static Scope scope;
   public static Collection collection;
+  private static Transactions transactions;
 
   @BeforeAll
   public static void CreateCouchbaseConnection() {
-    clusterName = System.getProperty("cluster");
+    clusterName = System.getProperty("upgradedCluster");
     user = System.getProperty("clusterUser");
     password = System.getProperty("clusterPassword");
     bucketName = System.getProperty("bucket");
@@ -46,10 +53,14 @@ public class PostUpgradeTest {// extends UpgradeTestBase{
 
     cluster = Cluster.connect(clusterName, user, password);
     cluster.waitUntilReady(Duration.ofSeconds(15L));
+    transactions = Transactions.create(cluster,
+      TransactionConfigBuilder.create().durabilityLevel(TransactionDurabilityLevel.MAJORITY).build());
 
     bucket = cluster.bucket(bucketName);
     scope = bucket.scope(scopeName);
     collection = scope.collection(collectionName);
+
+    fullCollectionName = "`"+ collection.bucketName() +"`.`"+ collection.scopeName() +"`.`"+ collection.name() +"`";
   }
 
   @AfterAll
@@ -64,9 +75,15 @@ public class PostUpgradeTest {// extends UpgradeTestBase{
 
     collection.upsert(id , content);
 
-
     assertEquals(collection.get(id).contentAs(String.class), content);
   }
+
+  private static final JsonObject content = JsonObject.create()
+    .put("foo", "bar")
+    .put("created", true)
+    .put("age", 12);
+
+  private static final JsonObject replaceContent = JsonObject.create().put("foo", "bar");
 
   @Test
   void emptyIfGetNotFound() {
@@ -76,11 +93,6 @@ public class PostUpgradeTest {// extends UpgradeTestBase{
   @Test
   void getWithProjection() {
     String id = UUID.randomUUID().toString();
-
-    JsonObject content = JsonObject.create()
-            .put("foo", "bar")
-            .put("created", true)
-            .put("age", 12);
 
     MutationResult mutationResult = collection.upsert(id, content);
     assertTrue(mutationResult.cas() != 0);
@@ -100,11 +112,6 @@ public class PostUpgradeTest {// extends UpgradeTestBase{
   void fullDocWithExpiration() {
     String id = UUID.randomUUID().toString();
 
-    JsonObject content = JsonObject.create()
-            .put("foo", "bar")
-            .put("created", true)
-            .put("age", 12);
-
     MutationResult mutationResult = collection.upsert(
             id,
             content,
@@ -122,11 +129,6 @@ public class PostUpgradeTest {// extends UpgradeTestBase{
   void fullDocWithExpirationAndCustomTranscoder() {
     String id = UUID.randomUUID().toString();
 
-    JsonObject content = JsonObject.create()
-            .put("foo", "bar")
-            .put("created", true)
-            .put("age", 12);
-
     MutationResult mutationResult = collection.upsert(
             id,
             content.toBytes(),
@@ -139,6 +141,104 @@ public class PostUpgradeTest {// extends UpgradeTestBase{
     assertTrue(getResult.expiryTime().isPresent());
     assertTrue(getResult.expiryTime().get().toEpochMilli() > 0);
     assertEquals(content, JsonObject.fromJson(getResult.contentAs(byte[].class)));
+  }
+
+  @Test
+  void insertKvTxnTest() {
+    String id = UUID.randomUUID().toString();
+
+    transactions.run(ctx -> {
+      ctx.insert(collection, id , content);
+    });
+    GetResult getResult = collection.get(id);
+    assertEquals(content, getResult.contentAsObject());
+  }
+
+  @Test
+  void replaceKvTxnTest() {
+    String id = UUID.randomUUID().toString();
+
+    collection.insert(id, content);
+
+    transactions.run(ctx -> {
+      TransactionGetResult getResult = ctx.get(collection, id);
+      ctx.replace(getResult, replaceContent);
+    });
+    GetResult getResult = collection.get(id);
+    assertEquals(replaceContent, getResult.contentAsObject());
+  }
+
+  @Test
+  void removeKvTxnTest() {
+    String id = UUID.randomUUID().toString();
+
+    collection.insert(id, content);
+
+    transactions.run(ctx -> {
+      TransactionGetResult getResult = ctx.get(collection, id);
+      ctx.remove(getResult);
+    });
+    try{
+      GetResult getResult = collection.get(id);
+      assertTrue(getResult.contentAsObject().equals(JsonObject.create()));
+    } catch (DocumentNotFoundException ex) {
+      //Expected res
+      assertTrue(ex.getMessage().contains("Document with the given id not found"));
+    }
+  }
+
+  @Test
+  void insertQueryTxnTest() {
+    String id = UUID.randomUUID().toString();
+
+    transactions.run(ctx -> {
+      ctx.query("INSERT INTO " + fullCollectionName + " VALUES ('" + id + "', " + content + ")");
+    });
+    GetResult getResult = collection.get(id);
+    assertEquals(content, getResult.contentAsObject());
+  }
+
+  @Test
+  void updateQueryTxnTest() {
+    String id = UUID.randomUUID().toString();
+
+    collection.insert(id, content);
+
+    transactions.run(ctx -> {
+      ctx.query("UPDATE " + fullCollectionName + " SET content = 'updated-query' WHERE META().id = '" + id + "'");
+    });
+    GetResult getResult = collection.get(id);
+    assertEquals(replaceContent, getResult.contentAsObject());
+  }
+
+  @Test
+  void selectQueryTxnTest() {
+    String id = UUID.randomUUID().toString();
+
+    collection.insert(id, content);
+
+    transactions.run(ctx -> {
+      QueryResult result = ctx.query("SELECT `default`.* from `default` WHERE META().id = '" + id + "'");
+      assertTrue(result.metaData().metrics().isPresent());
+    });
+  }
+
+  @Test
+  void removeQueryTxnTest() {
+    String id = UUID.randomUUID().toString();
+
+    collection.insert(id, content);
+
+    transactions.run(ctx -> {
+      ctx.query("DELETE FROM " + fullCollectionName + " WHERE META().id = '" + id + "'");
+    });
+    try{
+      GetResult getResult = collection.get(id);
+      assertTrue(getResult.contentAsObject().equals(JsonObject.create()));
+    } catch (DocumentNotFoundException ex) {
+      //Expected res
+      assertTrue(ex.getMessage().contains("Document with the given id not found"));
+    }
   }
 
 

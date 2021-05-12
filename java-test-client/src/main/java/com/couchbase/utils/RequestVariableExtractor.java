@@ -9,6 +9,7 @@ public class RequestVariableExtractor {
 
   public static void extractConnectionRequest(CreateConnectionRequest request) {
     testInfo.cluster = request.getClusterHostname();
+    testInfo.clusterUpgrade = request.getClusterHostnameAfterUpgrade();
     testInfo.user = request.getClusterUsername();
     testInfo.password = request.getClusterPassword();
     testInfo.bucket = request.getBucketName();
@@ -20,6 +21,7 @@ public class RequestVariableExtractor {
     System.out.println("Collection: " + testInfo.collection);
 
     System.setProperty("cluster", testInfo.cluster);
+    System.setProperty("upgradedCluster", testInfo.clusterUpgrade);
     System.setProperty("clusterUser", testInfo.user);
     System.setProperty("clusterPassword", testInfo.password);
     System.setProperty("bucket", testInfo.bucket);
